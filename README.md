@@ -31,21 +31,27 @@ Standard eigenvalues CSV exported from R or any PCA tool.
 - Columns matching `PC1, PC2, …` → plot axes
 - All other columns → available for color grouping
 
-### RDS (`prcomp` list)
-Save your `prcomp` result as a named list and upload directly:
+### RDS — two formats accepted
 
+**Plain `prcomp` object:**
+```r
+pca <- prcomp(data, scale. = TRUE)
+saveRDS(pca, "pca.rds")
+```
+
+**Named list** (adds metadata coloring):
 ```r
 pca_list <- list(
   PCA.df      = as.data.frame(pca$x),   # PC scores
   colData     = sample_metadata,          # metadata data frame
   Variance.df = variance_df,              # variance data frame
   prcomp.out  = pca,                      # prcomp object
-  rawCounts   = counts                    # ignored, can be omitted
+  rawCounts   = counts                    # optional, ignored
 )
 saveRDS(pca_list, "pca.rds")
 ```
 
-Uploading an RDS unlocks the **Scree Plot** view and adds **% variance** to each axis label.
+Both unlock the **Scree Plot** view and add **% variance** to each axis label. The named list format additionally exposes metadata columns for color grouping.
 
 ---
 

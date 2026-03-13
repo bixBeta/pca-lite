@@ -28,53 +28,60 @@ export async function parsePrcompRDS(file, onStatus) {
   await webR.evalR(`
     .obj <- readRDS('/tmp/_pca.rds')
 
-    # ── Validate top-level structure ──────────────────────────────────────────
-    if (!is.list(.obj))
-      stop('RDS must be a list. Got: ', paste(class(.obj), collapse = ', '))
+    # ── Detect format: plain prcomp OR named list ─────────────────────────────
+    if (inherits(.obj, 'prcomp')) {
+      # ── Plain prcomp object ──────────────────────────────────────────────────
+      .pca_df  <- as.data.frame(.obj$x)
+      .pc_cols <- colnames(.pca_df)
+      .sdev    <- .obj$sdev
 
-    .required <- c('PCA.df', 'colData', 'Variance.df', 'prcomp.out')
-    .missing   <- setdiff(.required, names(.obj))
-    if (length(.missing) > 0)
-      stop('Missing list elements: ', paste(.missing, collapse = ', '),
-           '. Found: ', paste(names(.obj), collapse = ', '))
+      .rn <- rownames(.obj$x)
+      if (is.null(.rn)) .rn <- as.character(seq_len(nrow(.pca_df)))
 
-    # ── PC scores ─────────────────────────────────────────────────────────────
-    .pca_df  <- as.data.frame(.obj$PCA.df)
-
-    # Detect PC columns (PC1, PC2, … case-insensitive)
-    .pc_cols <- grep('^PC[0-9]+$', colnames(.pca_df), value = TRUE, ignore.case = TRUE)
-    if (length(.pc_cols) == 0)
-      stop('No PC columns found in pca.df. Column names: ',
-           paste(colnames(.pca_df), collapse = ', '))
-
-    # ── Metadata ──────────────────────────────────────────────────────────────
-    .colData <- as.data.frame(.obj$colData)
-
-    # Sample labels: prefer pca.df rownames, fall back to colData rownames
-    .rn <- rownames(.pca_df)
-    if (is.null(.rn) || identical(.rn, as.character(seq_len(nrow(.pca_df))))) {
-      .rn2 <- rownames(.colData)
-      if (!is.null(.rn2)) .rn <- .rn2
-    }
-    if (is.null(.rn)) .rn <- as.character(seq_len(nrow(.pca_df)))
-
-    # ── Merge scores + metadata ───────────────────────────────────────────────
-    .combined <- cbind(.pca_df[, .pc_cols, drop = FALSE], .colData)
-
-    # Add Sample column if not already present
-    if (!'Sample' %in% colnames(.combined))
+      .combined <- .pca_df
       .combined[['Sample']] <- .rn
 
-    # ── Variance explained from prcomp.out$sdev ───────────────────────────────
-    .sdev <- .obj$prcomp.out$sdev
-    if (is.null(.sdev) || length(.sdev) == 0)
-      stop('prcomp.out$sdev is empty or NULL')
+    } else if (is.list(.obj)) {
+      # ── Named list format ────────────────────────────────────────────────────
+      .required <- c('PCA.df', 'colData', 'Variance.df', 'prcomp.out')
+      .missing   <- setdiff(.required, names(.obj))
+      if (length(.missing) > 0)
+        stop('Missing list elements: ', paste(.missing, collapse = ', '),
+             '. Found: ', paste(names(.obj), collapse = ', '))
 
+      .pca_df  <- as.data.frame(.obj$PCA.df)
+      .pc_cols <- grep('^PC[0-9]+$', colnames(.pca_df), value = TRUE, ignore.case = TRUE)
+      if (length(.pc_cols) == 0)
+        stop('No PC columns found in PCA.df. Column names: ',
+             paste(colnames(.pca_df), collapse = ', '))
+
+      .colData <- as.data.frame(.obj$colData)
+
+      .rn <- rownames(.pca_df)
+      if (is.null(.rn) || identical(.rn, as.character(seq_len(nrow(.pca_df))))) {
+        .rn2 <- rownames(.colData)
+        if (!is.null(.rn2)) .rn <- .rn2
+      }
+      if (is.null(.rn)) .rn <- as.character(seq_len(nrow(.pca_df)))
+
+      .combined <- cbind(.pca_df[, .pc_cols, drop = FALSE], .colData)
+      if (!'Sample' %in% colnames(.combined))
+        .combined[['Sample']] <- .rn
+
+      .sdev <- .obj$prcomp.out$sdev
+      if (is.null(.sdev) || length(.sdev) == 0)
+        stop('prcomp.out$sdev is empty or NULL')
+
+    } else {
+      stop('RDS must be a prcomp object or a named list. Got: ',
+           paste(class(.obj), collapse = ', '))
+    }
+
+    # ── Variance explained ────────────────────────────────────────────────────
     .var_exp <- (.sdev^2 / sum(.sdev^2)) * 100
-    # Align to the number of PC columns we actually have
     .var_exp  <- .var_exp[seq_along(.pc_cols)]
 
-    # ── Write combined CSV ─────────────────────────────────────────────────────
+    # ── Write combined CSV ────────────────────────────────────────────────────
     write.csv(.combined, '/tmp/_scores.csv', row.names = FALSE)
   `)
 
