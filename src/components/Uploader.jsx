@@ -94,10 +94,10 @@ export default function Uploader({ onDataLoaded, isDark, onThemeToggle }) {
             </div>
           </div>
           <p className="text-center text-sm max-w-md leading-relaxed" style={{ color: 'var(--text-2)' }}>
-            Upload a PCA eigenvalues CSV <span style={{ color: 'var(--text-3)' }}>or</span>{' '}
-            a <code className="text-xs px-1 py-0.5 rounded"
-                    style={{ backgroundColor: 'var(--bg-card)', color: '#a78bfa' }}>prcomp</code>{' '}
-            RDS to explore interactive{' '}
+            Upload a PCA eigenvalues CSV or a{' '}
+            <code className="text-xs px-1 py-0.5 rounded"
+                  style={{ backgroundColor: 'var(--bg-card)', color: '#a78bfa' }}>prcomp</code>{' '}
+            RDS object obtained from <span style={{ color: '#6366f1' }}>TREx</span>, to explore interactive{' '}
             <span style={{ color: '#6366f1' }}>2D</span> &amp;{' '}
             <span style={{ color: '#8b5cf6' }}>3D</span>{' '}
             scatter plots with scree analysis.
