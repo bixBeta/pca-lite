@@ -61,6 +61,16 @@ export default function Uploader({ onDataLoaded, isDark, onThemeToggle }) {
         <ThemeToggle isDark={isDark} onToggle={onThemeToggle} />
       </div>
 
+      {/* Footer */}
+      <div className="absolute bottom-4 right-5">
+        <span className="text-xs flex items-center gap-1 opacity-40" style={{ color: 'var(--text-3)' }}>
+          developed by{' '}
+          <a href="https://github.com/bixBeta" target="_blank" rel="noopener noreferrer"
+             className="hover:opacity-70 transition-opacity duration-200"
+             style={{ color: '#6366f1' }}>@bixBeta</a>
+        </span>
+      </div>
+
       {/* Background blobs */}
       <div className="absolute inset-0 pointer-events-none overflow-hidden">
         <div className="absolute -top-40 -left-40 w-96 h-96 rounded-full blur-3xl"
