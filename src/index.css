@@ -1,0 +1,150 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ── CSS custom properties — switched by .dark on <html> ── */
+:root {
+  --bg-app:       #f0f4ff;
+  --bg-panel:     #ffffff;
+  --bg-header:    rgba(255,255,255,0.85);
+  --bg-footer:    rgba(255,255,255,0.65);
+  --bg-card:      rgba(0,0,0,0.04);
+  --bg-input:     rgba(0,0,0,0.05);
+  --bg-moderow:   rgba(0,0,0,0.04);
+  --border:       rgba(0,0,0,0.07);
+  --border-input: rgba(0,0,0,0.12);
+  --text-1:       #1e293b;
+  --text-2:       #475569;
+  --text-3:       #94a3b8;
+  --text-4:       #cbd5e1;
+}
+
+.dark {
+  --bg-app:       #070b14;
+  --bg-panel:     #0d1424;
+  --bg-header:    rgba(13,20,36,0.85);
+  --bg-footer:    rgba(13,20,36,0.65);
+  --bg-card:      rgba(255,255,255,0.04);
+  --bg-input:     rgba(255,255,255,0.06);
+  --bg-moderow:   rgba(0,0,0,0.25);
+  --border:       rgba(255,255,255,0.06);
+  --border-input: rgba(255,255,255,0.12);
+  --text-1:       #e2e8f0;
+  --text-2:       #94a3b8;
+  --text-3:       #64748b;
+  --text-4:       #475569;
+}
+
+@layer base {
+  * { box-sizing: border-box; }
+  html, body, #root { height: 100%; margin: 0; padding: 0; }
+
+  body {
+    background-color: var(--bg-app);
+    color: var(--text-1);
+    font-family: 'Inter', system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    overflow: hidden;
+    transition: background-color 0.25s ease, color 0.2s ease;
+  }
+
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: rgba(0,0,0,0.04); border-radius: 3px; }
+  .dark ::-webkit-scrollbar-track { background: rgba(255,255,255,0.03); }
+  ::-webkit-scrollbar-thumb { background: rgba(99,102,241,0.35); border-radius: 3px; }
+  ::-webkit-scrollbar-thumb:hover { background: rgba(99,102,241,0.6); }
+  .dark ::-webkit-scrollbar-thumb { background: rgba(129,140,248,0.4); }
+  .dark ::-webkit-scrollbar-thumb:hover { background: rgba(129,140,248,0.7); }
+}
+
+@layer components {
+  .glass-card {
+    @apply backdrop-blur-sm rounded-xl;
+    background-color: var(--bg-card);
+    border: 1px solid var(--border);
+  }
+
+  .gradient-text {
+    @apply bg-clip-text text-transparent;
+    background-image: linear-gradient(to right, #4f46e5, #7c3aed, #db2777);
+  }
+
+  .select-styled {
+    @apply w-full rounded-lg px-3 py-2 text-sm appearance-none cursor-pointer
+           transition-all duration-150 focus:outline-none;
+    background-color: var(--bg-input);
+    border: 1px solid var(--border-input);
+    color: var(--text-1);
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%2394a3b8' stroke-width='1.5' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+    padding-right: 32px;
+  }
+  .select-styled:hover { border-color: rgba(99,102,241,0.5); }
+  .select-styled:focus { border-color: rgba(99,102,241,0.7); box-shadow: 0 0 0 3px rgba(99,102,241,0.15); }
+  .select-styled option { background-color: var(--bg-panel); color: var(--text-1); }
+
+  .btn-primary {
+    @apply inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium
+           text-white cursor-pointer transition-all duration-150;
+    background-image: linear-gradient(to right, #4f46e5, #7c3aed);
+    box-shadow: 0 4px 14px rgba(79,70,229,0.3);
+  }
+  .btn-primary:hover { filter: brightness(1.1); }
+
+  .btn-ghost {
+    @apply inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium
+           cursor-pointer transition-all duration-150;
+    color: var(--text-2);
+  }
+  .btn-ghost:hover { color: var(--text-1); background-color: var(--bg-card); }
+
+  .label-sm {
+    @apply text-xs font-medium uppercase tracking-widest;
+    color: var(--text-3);
+  }
+
+  .stat-chip {
+    @apply inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs;
+    background-color: var(--bg-card);
+    border: 1px solid var(--border);
+    color: var(--text-2);
+  }
+}
+
+/* gradient-text dark override */
+.dark .gradient-text {
+  background-image: linear-gradient(to right, #818cf8, #a78bfa, #f472b6);
+}
+
+/* ── Plotly modebar ── */
+.js-plotly-plot .plotly .modebar-container { background: transparent !important; }
+.js-plotly-plot .plotly .modebar { background: transparent !important; border-radius: 8px !important; }
+.js-plotly-plot .plotly .modebar-btn { background: transparent !important; }
+.js-plotly-plot .plotly .modebar-btn path { fill: rgba(71,85,105,0.8) !important; }
+.js-plotly-plot .plotly .modebar-btn:hover { background: var(--bg-app) !important; border-radius: 4px !important; }
+.js-plotly-plot .plotly .modebar-btn:hover path { fill: rgba(71,85,105,1) !important; }
+.dark .js-plotly-plot .plotly .modebar-btn path { fill: rgba(148,163,184,0.8) !important; }
+.dark .js-plotly-plot .plotly .modebar-btn:hover { background: var(--bg-app) !important; }
+.dark .js-plotly-plot .plotly .modebar-btn:hover path { fill: rgba(148,163,184,1) !important; }
+
+/* ── Range input ── */
+input[type='range'] {
+  -webkit-appearance: none; appearance: none;
+  height: 4px; border-radius: 2px;
+  background: rgba(0,0,0,0.1); outline: none; cursor: pointer;
+}
+.dark input[type='range'] { background: rgba(255,255,255,0.1); }
+input[type='range']::-webkit-slider-thumb {
+  -webkit-appearance: none; appearance: none;
+  width: 14px; height: 14px; border-radius: 50%;
+  background: linear-gradient(135deg, #6366f1, #8b5cf6);
+  cursor: pointer; box-shadow: 0 0 8px rgba(99,102,241,0.5);
+  transition: transform 0.1s;
+}
+input[type='range']::-webkit-slider-thumb:hover { transform: scale(1.2); }
+input[type='range']::-moz-range-thumb {
+  width: 14px; height: 14px; border-radius: 50%;
+  background: linear-gradient(135deg, #6366f1, #8b5cf6);
+  cursor: pointer; border: none;
+}
