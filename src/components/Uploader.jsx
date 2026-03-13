@@ -206,6 +206,7 @@ export default function Uploader({ onDataLoaded, isDark, onThemeToggle }) {
               <p className="label-sm">RDS Format</p>
             </div>
             <div className="font-mono text-xs space-y-1" style={{ color: 'var(--text-2)' }}>
+              <div style={{ color: 'var(--text-3)' }} className="text-xs mb-1">plain prcomp:</div>
               <div>
                 <span style={{ color: '#a78bfa' }}>pca</span>
                 <span style={{ color: 'var(--text-3)' }}> &lt;- </span>
@@ -213,6 +214,11 @@ export default function Uploader({ onDataLoaded, isDark, onThemeToggle }) {
               </div>
               <div>
                 saveRDS(<span style={{ color: '#a78bfa' }}>pca</span>,{' '}
+                <span style={{ color: '#34d399' }}>"pca.rds"</span>)
+              </div>
+              <div style={{ color: 'var(--text-3)' }} className="text-xs mt-2 mb-1">or named list (+ metadata):</div>
+              <div>
+                saveRDS(<span style={{ color: '#a78bfa' }}>list</span>(PCA.df, colData, ...),{' '}
                 <span style={{ color: '#34d399' }}>"pca.rds"</span>)
               </div>
             </div>
