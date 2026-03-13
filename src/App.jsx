@@ -5,7 +5,7 @@ import Dashboard from './components/Dashboard'
 export default function App() {
   const [parsedData, setParsedData] = useState(null)
   const [fileName, setFileName] = useState('')
-  const [isDark, setIsDark] = useState(true)
+  const [isDark, setIsDark] = useState(false)
 
   // Apply / remove 'dark' class on <html>
   useEffect(() => {
