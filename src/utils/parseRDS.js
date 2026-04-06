@@ -41,6 +41,34 @@ export async function parsePrcompRDS(file, onStatus) {
       .combined <- .pca_df
       .combined[['Sample']] <- .rn
 
+    } else if (is.list(.obj) && all(c('counts', 'metadata') %in% names(.obj))) {
+      # DESeq2 prep-tool format: list(counts=matrix, metadata=data.frame)
+      .counts <- as.matrix(.obj$counts)
+      .meta   <- as.data.frame(.obj$metadata)
+
+      # log1p-CPM normalisation
+      .cpm  <- sweep(.counts, 2, colSums(.counts), '/') * 1e6
+      .norm <- log1p(.cpm)
+
+      # PCA on samples (transpose), centered + scaled
+      .pca    <- prcomp(t(.norm), center = TRUE, scale. = TRUE)
+      .pca_df <- as.data.frame(.pca$x)
+      .pc_cols <- colnames(.pca_df)
+      .sdev   <- .pca$sdev
+
+      .rn <- colnames(.counts)
+      if (is.null(.rn)) .rn <- as.character(seq_len(ncol(.counts)))
+
+      # Align metadata to sample order
+      if (!is.null(rownames(.meta))) {
+        .meta_ord <- .meta[match(.rn, rownames(.meta)), , drop = FALSE]
+      } else {
+        .meta_ord <- .meta
+      }
+
+      .combined <- cbind(.pca_df, .meta_ord)
+      .combined[['Sample']] <- .rn
+
     } else if (is.list(.obj)) {
       # ── Named list format ────────────────────────────────────────────────────
       .required <- c('PCA.df', 'colData', 'Variance.df', 'prcomp.out')
@@ -130,7 +158,8 @@ export async function parsePrcompRDS(file, onStatus) {
   await webR.evalR(`
     rm(list = intersect(ls(), c('.obj', '.pca_df', '.colData', '.combined',
                                 '.pc_cols', '.rn', '.sdev', '.var_exp',
-                                '.required', '.missing')))
+                                '.required', '.missing',
+                                '.pca', '.cpm', '.norm', '.meta', '.meta_ord')))
   `)
 
   return { rows, pcColumns: pcNames, metaColumns, varExplained }

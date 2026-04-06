@@ -54,6 +54,7 @@ export default function Dashboard({ data, fileName, onReset, isDark, onThemeTogg
   const [yAxis,      setYAxis]      = useState(pcColumns[1])
   const [zAxis,      setZAxis]      = useState(pcColumns[2] ?? pcColumns[0])
   const [colorBy,    setColorBy]    = useState(metaColumns[0] ?? '')
+  const [shapeBy,    setShapeBy]    = useState('')
   const [pointSize,  setPointSize]  = useState(20)
   const [opacity,    setOpacity]    = useState(0.85)
   const [showLabels, setShowLabels] = useState(false)
@@ -140,10 +141,10 @@ export default function Dashboard({ data, fileName, onReset, isDark, onThemeTogg
         <ControlPanel
           pcColumns={pcColumns} metaColumns={metaColumns}
           mode={mode} onModeChange={handleModeChange}
-          xAxis={xAxis} yAxis={yAxis} zAxis={zAxis} colorBy={colorBy}
+          xAxis={xAxis} yAxis={yAxis} zAxis={zAxis} colorBy={colorBy} shapeBy={shapeBy}
           pointSize={pointSize} opacity={opacity} showLabels={showLabels}
           onXAxisChange={setXAxis} onYAxisChange={setYAxis} onZAxisChange={setZAxis}
-          onColorByChange={setColorBy} onPointSizeChange={setPointSize}
+          onColorByChange={setColorBy} onShapeByChange={setShapeBy} onPointSizeChange={setPointSize}
           onOpacityChange={setOpacity} onShowLabelsChange={setShowLabels}
           sampleCount={rows.length} groupCount={groupCount} isDark={isDark}
           varExplained={varExplained}
@@ -162,7 +163,7 @@ export default function Dashboard({ data, fileName, onReset, isDark, onThemeTogg
               ) : (
                 <ScatterPlot
                   rows={rows} mode={mode} xAxis={xAxis} yAxis={yAxis} zAxis={zAxis}
-                  colorBy={colorBy} pointSize={pointSize} opacity={opacity}
+                  colorBy={colorBy} shapeBy={shapeBy} pointSize={pointSize} opacity={opacity}
                   showLabels={showLabels} metaColumns={metaColumns} isDark={isDark}
                   varExplained={varExplained}
                 />

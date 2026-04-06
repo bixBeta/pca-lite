@@ -192,6 +192,7 @@ export default function Uploader({ onDataLoaded, isDark, onThemeToggle }) {
               <p className="label-sm">CSV Format</p>
             </div>
             <div className="font-mono text-xs overflow-x-auto whitespace-nowrap space-y-1">
+              <div style={{ color: 'var(--text-3)' }} className="text-xs mb-1">standard:</div>
               <div>
                 <span style={{ color: 'var(--text-3)' }}>"",</span>
                 <span style={{ color: '#6366f1' }}>"PC1","PC2",...,</span>
@@ -202,10 +203,16 @@ export default function Uploader({ onDataLoaded, isDark, onThemeToggle }) {
                 <span style={{ color: isDark ? '#a5b4fc' : '#4f46e5' }}>-1.06,-28.3,...,</span>
                 <span style={{ color: isDark ? '#6ee7b7' : '#059669' }}>"A","GroupX"</span>
               </div>
+              <div style={{ color: 'var(--text-3)' }} className="text-xs mt-2 mb-1">DESeq2 ExploreR export:</div>
+              <div>
+                <span style={{ color: '#10b981' }}>"sample","group",...,</span>
+                <span style={{ color: '#6366f1' }}>"PC1 (51.8%)","PC2 (12.9%)"</span>
+              </div>
             </div>
             <div className="mt-2.5 flex flex-wrap gap-1.5">
               <span className="stat-chip"><span className="w-2 h-2 rounded-full bg-indigo-500" />PC cols → axes</span>
               <span className="stat-chip"><span className="w-2 h-2 rounded-full bg-emerald-500" />other → color</span>
+              <span className="stat-chip"><span className="w-2 h-2 rounded-full bg-pink-400" />% suffix → scree</span>
             </div>
           </div>
 
@@ -230,6 +237,11 @@ export default function Uploader({ onDataLoaded, isDark, onThemeToggle }) {
               <div>
                 saveRDS(<span style={{ color: '#a78bfa' }}>list</span>(PCA.df, colData, ...),{' '}
                 <span style={{ color: '#34d399' }}>"pca.rds"</span>)
+              </div>
+              <div style={{ color: 'var(--text-3)' }} className="text-xs mt-2 mb-1">or DESeq2 prep RDS (auto-PCA):</div>
+              <div>
+                saveRDS(<span style={{ color: '#a78bfa' }}>list</span>(counts, metadata),{' '}
+                <span style={{ color: '#34d399' }}>"prep.rds"</span>)
               </div>
             </div>
             <div className="mt-2.5 flex flex-wrap gap-1.5">

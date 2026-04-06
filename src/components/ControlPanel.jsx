@@ -1,8 +1,8 @@
 export default function ControlPanel({
   pcColumns, metaColumns, mode, onModeChange,
-  xAxis, yAxis, zAxis, colorBy,
+  xAxis, yAxis, zAxis, colorBy, shapeBy,
   pointSize, opacity, showLabels,
-  onXAxisChange, onYAxisChange, onZAxisChange, onColorByChange,
+  onXAxisChange, onYAxisChange, onZAxisChange, onColorByChange, onShapeByChange,
   onPointSizeChange, onOpacityChange, onShowLabelsChange,
   sampleCount, groupCount, isDark,
 }) {
@@ -37,6 +37,17 @@ export default function ControlPanel({
         <Section title="Color By">
           {metaColumns.length > 0 ? (
             <select className="select-styled" value={colorBy} onChange={e => onColorByChange(e.target.value)}>
+              {metaColumns.map(col => <option key={col} value={col}>{col}</option>)}
+            </select>
+          ) : (
+            <p className="text-xs italic" style={{ color: 'var(--text-3)' }}>No metadata columns found</p>
+          )}
+        </Section>
+
+        <Section title="Shape By">
+          {metaColumns.length > 0 ? (
+            <select className="select-styled" value={shapeBy} onChange={e => onShapeByChange(e.target.value)}>
+              <option value="">None</option>
               {metaColumns.map(col => <option key={col} value={col}>{col}</option>)}
             </select>
           ) : (

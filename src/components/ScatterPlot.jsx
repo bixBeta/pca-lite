@@ -2,6 +2,9 @@ import { useMemo, useEffect, useRef } from 'react'
 import Plotly from 'plotly.js-dist-min'
 import { buildColorMap } from '../utils/colors'
 
+const SYMBOLS_2D = ['circle','square','diamond','triangle-up','cross','x','triangle-down','pentagon','hexagon','star','bowtie','hourglass']
+const SYMBOLS_3D = ['circle','square','diamond','cross','x']
+
 const PLOTLY_CONFIG = {
   displaylogo: false,
   responsive: true,
@@ -98,7 +101,7 @@ function buildLayout(isDark, mode, xAxis, yAxis, zAxis, varExplained) {
 }
 
 export default function ScatterPlot({
-  rows, mode, xAxis, yAxis, zAxis, colorBy,
+  rows, mode, xAxis, yAxis, zAxis, colorBy, shapeBy,
   pointSize, opacity, showLabels, metaColumns, isDark, varExplained,
 }) {
   const containerRef = useRef(null)
@@ -111,6 +114,14 @@ export default function ScatterPlot({
     const colorMap = buildColorMap(colorValues)
     const groups = [...new Set(colorValues)]
     const is3D = mode === '3D'
+
+    // Build shapeMap: unique shapeBy values → symbol strings
+    const shapeUniqueVals = shapeBy
+      ? [...new Set(rows.map(r => r[shapeBy] ?? 'Unknown'))]
+      : []
+    const shapeMap = shapeBy
+      ? Object.fromEntries(shapeUniqueVals.map((v, i) => [v, (is3D ? SYMBOLS_3D : SYMBOLS_2D)[i % (is3D ? SYMBOLS_3D : SYMBOLS_2D).length]]))
+      : null
 
     const traces = groups.map(group => {
       const gr = rows.filter(r => (r[colorBy] ?? 'Unknown') === group)
@@ -128,6 +139,9 @@ export default function ScatterPlot({
 
       const labels = showLabels ? gr.map(r => r[metaColumns[0]] ?? '') : gr.map(() => '')
       const color = colorMap[group]
+      const symbols = shapeMap
+        ? gr.map(r => shapeMap[r[shapeBy] ?? 'Unknown'])
+        : 'circle'
 
       if (is3D) {
         return {
@@ -139,6 +153,7 @@ export default function ScatterPlot({
           customdata: hoverTexts,
           marker: {
             color, size: pointSize * 0.7, opacity,
+            symbol: symbols,
             line: { color: isDark ? 'rgba(255,255,255,0.15)' : 'rgba(0,0,0,0.1)', width: 0.5 },
           },
         }
@@ -153,13 +168,14 @@ export default function ScatterPlot({
         customdata: hoverTexts,
         marker: {
           color, size: pointSize, opacity,
+          symbol: symbols,
           line: { color: isDark ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.15)', width: 0.8 },
         },
       }
     })
 
     return { traces, layout: buildLayout(isDark, mode, xAxis, yAxis, zAxis, varExplained) }
-  }, [rows, mode, xAxis, yAxis, zAxis, colorBy, pointSize, opacity, showLabels, metaColumns, isDark, varExplained])
+  }, [rows, mode, xAxis, yAxis, zAxis, colorBy, shapeBy, pointSize, opacity, showLabels, metaColumns, isDark, varExplained])
 
   useEffect(() => {
     if (!containerRef.current) return
