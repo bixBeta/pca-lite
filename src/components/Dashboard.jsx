@@ -4,48 +4,37 @@ import ScatterPlot from './ScatterPlot'
 import ScreePlot from './ScreePlot'
 import { buildColorMap } from '../utils/colors'
 
-function exportPCAScores({ rows, pcColumns, metaColumns, varExplained, fileName }) {
+function triggerDownload(csv, name) {
+  const blob = new Blob([csv], { type: 'text/csv' })
+  const url  = URL.createObjectURL(blob)
+  const a    = document.createElement('a')
+  a.href = url; a.download = name; a.click()
+  URL.revokeObjectURL(url)
+}
+
+function exportScores({ rows, pcColumns, metaColumns, varExplained, fileName }) {
   const pcHeaders = pcColumns.map(pc =>
     varExplained?.[pc] != null ? `${pc} (${varExplained[pc].toFixed(1)}%)` : pc
   )
-
-  // ── Main table ───────────────────────────────────────────────────────────────
-  const headerRow = [...metaColumns, ...pcHeaders].join(',')
-  const dataRows  = rows.map(r => {
-    const metaVals = metaColumns.map(c => {
-      const v = String(r[c] ?? '')
-      return v.includes(',') ? `"${v}"` : v
-    })
-    const pcVals   = pcColumns.map(c => (r[c] ?? 0).toFixed(6))
-    return [...metaVals, ...pcVals].join(',')
+  const header   = [...metaColumns, ...pcHeaders].join(',')
+  const dataRows = rows.map(r => {
+    const meta = metaColumns.map(c => { const v = String(r[c] ?? ''); return v.includes(',') ? `"${v}"` : v })
+    const pcs  = pcColumns.map(c => (r[c] ?? 0).toFixed(6))
+    return [...meta, ...pcs].join(',')
   })
+  const stem = fileName.replace(/\.[^.]+$/, '')
+  triggerDownload([header, ...dataRows].join('\n'), `${stem}_PCA_scores.csv`)
+}
 
-  // ── Scree section ────────────────────────────────────────────────────────────
-  let screePart = ''
-  if (varExplained) {
-    let cumulative = 0
-    const screeRows = pcColumns.map(pc => {
-      const v = varExplained[pc] ?? 0
-      cumulative += v
-      return `${pc},${v.toFixed(4)},${cumulative.toFixed(4)}`
-    })
-    screePart = [
-      '',                                       // blank separator line
-      '# Variance Explained',
-      'PC,Variance_Pct,Cumulative_Pct',
-      ...screeRows,
-    ].join('\n')
-  }
-
-  const csv     = [headerRow, ...dataRows].join('\n') + screePart
-  const blob    = new Blob([csv], { type: 'text/csv' })
-  const url     = URL.createObjectURL(blob)
-  const a       = document.createElement('a')
-  const stem    = fileName.replace(/\.[^.]+$/, '')
-  a.href        = url
-  a.download    = `${stem}_PCA_scores.csv`
-  a.click()
-  URL.revokeObjectURL(url)
+function exportScree({ pcColumns, varExplained, fileName }) {
+  if (!varExplained) return
+  let cum = 0
+  const rows = pcColumns.map(pc => {
+    const v = varExplained[pc] ?? 0; cum += v
+    return `${pc},${v.toFixed(4)},${cum.toFixed(4)}`
+  })
+  const stem = fileName.replace(/\.[^.]+$/, '')
+  triggerDownload(['PC,Variance_Pct,Cumulative_Pct', ...rows].join('\n'), `${stem}_scree.csv`)
 }
 
 const S = {
@@ -140,14 +129,6 @@ export default function Dashboard({ data, fileName, onReset, isDark, onThemeTogg
 
           <ThemeToggle isDark={isDark} onToggle={onThemeToggle} />
 
-          <button
-            onClick={() => exportPCAScores({ rows, pcColumns, metaColumns, varExplained, fileName })}
-            className="btn-ghost text-xs"
-            title="Download PCA scores + metadata as CSV"
-          >
-            <DownloadIcon /> Export CSV
-          </button>
-
           <button onClick={onReset} className="btn-ghost text-xs" title="Upload new file">
             <UploadIcon /> New File
           </button>
@@ -186,6 +167,36 @@ export default function Dashboard({ data, fileName, onReset, isDark, onThemeTogg
                   varExplained={varExplained}
                 />
               )}
+
+              {/* ── Export toolbar ── */}
+              <div className="absolute top-3 right-3 flex items-center gap-1.5 z-10">
+                <button
+                  onClick={() => exportScores({ rows, pcColumns, metaColumns, varExplained, fileName })}
+                  title="Download PCA scores joined with metadata"
+                  style={{
+                    display: 'flex', alignItems: 'center', gap: 5,
+                    padding: '4px 10px', borderRadius: 7, fontSize: '0.7rem', fontWeight: 600,
+                    backgroundColor: 'var(--bg-card)', border: '1px solid var(--border-input)',
+                    color: 'var(--text-2)', cursor: 'pointer', backdropFilter: 'blur(8px)',
+                    boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
+                  }}>
+                  <DownloadIcon /> Scores + Metadata
+                </button>
+                {varExplained && (
+                  <button
+                    onClick={() => exportScree({ pcColumns, varExplained, fileName })}
+                    title="Download scree (variance explained per PC)"
+                    style={{
+                      display: 'flex', alignItems: 'center', gap: 5,
+                      padding: '4px 10px', borderRadius: 7, fontSize: '0.7rem', fontWeight: 600,
+                      backgroundColor: 'var(--bg-card)', border: '1px solid var(--border-input)',
+                      color: 'var(--text-2)', cursor: 'pointer', backdropFilter: 'blur(8px)',
+                      boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
+                    }}>
+                    <DownloadIcon /> Scree
+                  </button>
+                )}
+              </div>
             </div>
           </div>
 
