@@ -4,6 +4,50 @@ import ScatterPlot from './ScatterPlot'
 import ScreePlot from './ScreePlot'
 import { buildColorMap } from '../utils/colors'
 
+function exportPCAScores({ rows, pcColumns, metaColumns, varExplained, fileName }) {
+  const pcHeaders = pcColumns.map(pc =>
+    varExplained?.[pc] != null ? `${pc} (${varExplained[pc].toFixed(1)}%)` : pc
+  )
+
+  // ── Main table ───────────────────────────────────────────────────────────────
+  const headerRow = [...metaColumns, ...pcHeaders].join(',')
+  const dataRows  = rows.map(r => {
+    const metaVals = metaColumns.map(c => {
+      const v = String(r[c] ?? '')
+      return v.includes(',') ? `"${v}"` : v
+    })
+    const pcVals   = pcColumns.map(c => (r[c] ?? 0).toFixed(6))
+    return [...metaVals, ...pcVals].join(',')
+  })
+
+  // ── Scree section ────────────────────────────────────────────────────────────
+  let screePart = ''
+  if (varExplained) {
+    let cumulative = 0
+    const screeRows = pcColumns.map(pc => {
+      const v = varExplained[pc] ?? 0
+      cumulative += v
+      return `${pc},${v.toFixed(4)},${cumulative.toFixed(4)}`
+    })
+    screePart = [
+      '',                                       // blank separator line
+      '# Variance Explained',
+      'PC,Variance_Pct,Cumulative_Pct',
+      ...screeRows,
+    ].join('\n')
+  }
+
+  const csv     = [headerRow, ...dataRows].join('\n') + screePart
+  const blob    = new Blob([csv], { type: 'text/csv' })
+  const url     = URL.createObjectURL(blob)
+  const a       = document.createElement('a')
+  const stem    = fileName.replace(/\.[^.]+$/, '')
+  a.href        = url
+  a.download    = `${stem}_PCA_scores.csv`
+  a.click()
+  URL.revokeObjectURL(url)
+}
+
 const S = {
   app:    { backgroundColor: 'var(--bg-app)',    color: 'var(--text-1)' },
   header: { backgroundColor: 'var(--bg-header)', borderBottom: '1px solid var(--border)' },
@@ -95,6 +139,14 @@ export default function Dashboard({ data, fileName, onReset, isDark, onThemeTogg
           </span>
 
           <ThemeToggle isDark={isDark} onToggle={onThemeToggle} />
+
+          <button
+            onClick={() => exportPCAScores({ rows, pcColumns, metaColumns, varExplained, fileName })}
+            className="btn-ghost text-xs"
+            title="Download PCA scores + metadata as CSV"
+          >
+            <DownloadIcon /> Export CSV
+          </button>
 
           <button onClick={onReset} className="btn-ghost text-xs" title="Upload new file">
             <UploadIcon /> New File
@@ -296,6 +348,17 @@ function UploadIcon() {
          stroke="currentColor" strokeWidth="2" strokeLinecap="round">
       <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
       <polyline points="17 8 12 3 7 8"/>
+      <line x1="12" y1="3" x2="12" y2="15"/>
+    </svg>
+  )
+}
+
+function DownloadIcon() {
+  return (
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="none"
+         stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+      <polyline points="7 10 12 15 17 10"/>
       <line x1="12" y1="3" x2="12" y2="15"/>
     </svg>
   )
